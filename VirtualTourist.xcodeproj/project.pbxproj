@@ -13,6 +13,7 @@
 		705A70FF1C84AAFA001222D2 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 705A70FD1C84AAFA001222D2 /* LaunchScreen.storyboard */; };
 		705A710A1C84AAFA001222D2 /* VirtualTouristTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 705A71091C84AAFA001222D2 /* VirtualTouristTests.swift */; };
 		705A71151C84ACDC001222D2 /* LocationMapVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 705A71141C84ACDC001222D2 /* LocationMapVC.swift */; };
+		705A71191C84BD61001222D2 /* CoreDataStackManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 705A71181C84BD61001222D2 /* CoreDataStackManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,6 +37,7 @@
 		705A71091C84AAFA001222D2 /* VirtualTouristTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTouristTests.swift; sourceTree = "<group>"; };
 		705A710B1C84AAFA001222D2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		705A71141C84ACDC001222D2 /* LocationMapVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationMapVC.swift; sourceTree = "<group>"; };
+		705A71181C84BD61001222D2 /* CoreDataStackManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataStackManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,6 +81,7 @@
 			children = (
 				705A70F41C84AAFA001222D2 /* AppDelegate.swift */,
 				705A70F81C84AAFA001222D2 /* Main.storyboard */,
+				705A71181C84BD61001222D2 /* CoreDataStackManager.swift */,
 				705A71141C84ACDC001222D2 /* LocationMapVC.swift */,
 				705A70FB1C84AAFA001222D2 /* Assets.xcassets */,
 				705A70FD1C84AAFA001222D2 /* LaunchScreen.storyboard */,
@@ -200,6 +203,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				705A71151C84ACDC001222D2 /* LocationMapVC.swift in Sources */,
+				705A71191C84BD61001222D2 /* CoreDataStackManager.swift in Sources */,
 				705A70F51C84AAFA001222D2 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -388,6 +392,7 @@
 				705A71101C84AAFA001222D2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		705A71111C84AAFA001222D2 /* Build configuration list for PBXNativeTarget "VirtualTouristTests" */ = {
 			isa = XCConfigurationList;
@@ -396,6 +401,7 @@
 				705A71131C84AAFA001222D2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
