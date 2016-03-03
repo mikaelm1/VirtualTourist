@@ -44,18 +44,23 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
     
     
     func dropPin(gestureRecognizer: UIGestureRecognizer) {
-        let touchPoint = gestureRecognizer.locationInView(map)
-        let coordinate = map.convertPoint(touchPoint, toCoordinateFromView: map)
-        let annotation = MKPointAnnotation()
-        annotation.coordinate = coordinate
         
-        searchPhotos(coordinate.latitude, lon: coordinate.longitude)
+        if gestureRecognizer.state == .Began {
+            print("Dropped Pin")
+            let touchPoint = gestureRecognizer.locationInView(map)
+            let coordinate = map.convertPoint(touchPoint, toCoordinateFromView: map)
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = coordinate
+            
+            searchPhotos(coordinate.latitude, lon: coordinate.longitude)
+            
+            let _ = Pin(latitude: coordinate.latitude, longitude: coordinate.longitude, context: sharedContext)
+            
+            saveContext()
+            
+            map.addAnnotation(annotation)
+        }
         
-        let _ = Pin(latitude: coordinate.latitude, longitude: coordinate.longitude, context: sharedContext)
-        
-        saveContext()
-        
-        map.addAnnotation(annotation)
     }
     
     func dropAllPins() {
@@ -74,7 +79,9 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
         print("SearchPhotos in Map")
         Flickr.sharedInstance().searchByLatLon(lat, longitude: lon) { (result, error) -> Void in
             
-            //print("Result : \(result)")
+            if result != nil {
+                print("Got result")
+            }
         }
     }
     
@@ -82,7 +89,7 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
         map.delegate = self
         
         let uilpgr = UILongPressGestureRecognizer(target: self, action: "dropPin:")
-        uilpgr.minimumPressDuration = 1.0
+        uilpgr.minimumPressDuration = 1.5
         map.addGestureRecognizer(uilpgr)
         
         let latitude = NSUserDefaults.standardUserDefaults().doubleForKey(latKey)
