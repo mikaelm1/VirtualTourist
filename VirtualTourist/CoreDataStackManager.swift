@@ -13,13 +13,6 @@ private let SQLITE_FILE_NAME = "ColorCollection.sqlite"
 
 class CoreDataStackManager {
     
-    class func sharedInstance() -> CoreDataStackManager {
-        struct Static {
-            static let instance = CoreDataStackManager()
-        }
-        return Static.instance
-    }
-    
     lazy var applicationDocumentsDirectory: NSURL = {
         print("Instantiating app directory")
         let urls = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask)
@@ -66,6 +59,13 @@ class CoreDataStackManager {
         managedObjectContext.persistentStoreCoordinator = coordinator
         return managedObjectContext
     }()
+    
+    class func sharedInstance() -> CoreDataStackManager {
+        struct Static {
+            static let instance = CoreDataStackManager()
+        }
+        return Static.instance
+    }
     
     func saveContext() {
         if let context = self.managedObjectContext {
