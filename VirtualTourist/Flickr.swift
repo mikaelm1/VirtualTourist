@@ -9,7 +9,7 @@
 import UIKit
 import CoreData
 
-typealias CompletionHandler = (result: String?, error: String?) -> Void
+typealias CompletionHandler = (result: [String: NSData]?, error: String?) -> Void
 
 class Flickr {
     
@@ -24,7 +24,7 @@ class Flickr {
     func searchByLatLon(latitude: Double, longitude: Double, completionHandlerForLatLon: CompletionHandler) {
         print("Search by Lat Lon")
                 
-        let url = NSURL(string: "https:api.flickr.com/services/rest/?method=flickr.photos.search&api_key=\(Constants.APIKey)&lat=34&lon=-118&format=json&nojsoncallback=1&extras=url_m&per_page=12")!
+        let url = NSURL(string: "https:api.flickr.com/services/rest/?method=flickr.photos.search&api_key=\(Constants.APIKey)&lat=\(latitude)&lon=\(longitude)&format=json&nojsoncallback=1&extras=url_m&per_page=12")!
         
         let request = NSMutableURLRequest(URL: url)
         
@@ -32,6 +32,7 @@ class Flickr {
             
             func sendError(error: String) {
                 print(error)
+                completionHandlerForLatLon(result: nil, error: "No result. Sending error")
             }
             
             guard (error == nil) else {
@@ -51,7 +52,7 @@ class Flickr {
                 sendError("Unable to parse into JSON")
                 return
             }
-            //print(parsedResult)
+            //print("Parsed Results: \(parsedResult)")
             
             guard let photos = parsedResult["photos"] as? [String: AnyObject] else {
                 sendError("Unable to get photos from JSON")
@@ -72,6 +73,7 @@ class Flickr {
                 return
             } else {
                 
+                var imageDictionary = [String: NSData]()
                 for photoDictionary in photosArrayOfDicts{
                     let photo = photoDictionary as [String: AnyObject]
                     
@@ -82,12 +84,14 @@ class Flickr {
                     //print(imageUrlString)
                     
                     let imageURL = NSURL(string: imageUrlString)
-                    if let imageData = NSData(contentsOfURL: imageURL!) {
-                        completionHandlerForLatLon(result: imageUrlString, error: nil)
-                        
-                        let _ = Photo(imageUrl: imageUrlString, imageData: imageData, context: self.sharedContext)
+                    guard let imageData = NSData(contentsOfURL: imageURL!) else {
+                        sendError("Unable to get image data")
+                        return
+                        //let _ = Photo(imageUrl: imageUrlString, imageData: imageData, context: self.sharedContext)
                     }
+                    imageDictionary[imageUrlString] = imageData
                 }
+                completionHandlerForLatLon(result: imageDictionary, error: nil)
                 
             }
             

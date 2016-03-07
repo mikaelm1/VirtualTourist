@@ -50,7 +50,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="glG-8q-nKr">
-                                <rect key="frame" x="0.0" y="159" width="600" height="441"/>
+                                <rect key="frame" x="0.0" y="205" width="600" height="395"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="tVC-52-aSa">
                                     <size key="itemSize" width="143" height="131"/>
@@ -59,7 +59,7 @@
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="Cell" id="NEp-Rc-t2t" customClass="PhotoCell" customModule="VirtualTourist" customModuleProvider="target">
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="Cell" id="NEp-Rc-t2t">
                                         <rect key="frame" x="0.0" y="0.0" width="143" height="131"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
@@ -71,23 +71,60 @@
                                     </collectionViewCell>
                                 </cells>
                             </collectionView>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nwG-ao-NaX">
+                                <rect key="frame" x="0.0" y="556" width="600" height="44"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="44" id="HjO-wK-lqf"/>
+                                </constraints>
+                                <items>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="lSa-Do-2aE"/>
+                                    <barButtonItem title="New Collection" id="U6I-s0-7e9">
+                                        <connections>
+                                            <action selector="newCollectionRequested:" destination="0Zm-UO-ljR" id="myQ-Z3-2Jg"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="RB9-kK-IMj"/>
+                                </items>
+                            </toolbar>
+                            <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="IkI-Zg-jVH">
+                                <rect key="frame" x="0.0" y="5" width="600" height="44"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="44" id="aGV-xW-RxU"/>
+                                </constraints>
+                                <items>
+                                    <navigationItem id="Ugu-cv-oO1">
+                                        <barButtonItem key="leftBarButtonItem" title="OK" id="6ge-kY-XPO">
+                                            <connections>
+                                                <action selector="backToMap:" destination="0Zm-UO-ljR" id="EJl-2Q-EPb"/>
+                                            </connections>
+                                        </barButtonItem>
+                                    </navigationItem>
+                                </items>
+                            </navigationBar>
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="cS9-ex-71k">
-                                <rect key="frame" x="0.0" y="0.0" width="600" height="159"/>
+                                <rect key="frame" x="0.0" y="49" width="600" height="156"/>
                             </mapView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="cS9-ex-71k" firstAttribute="leading" secondItem="dUv-Gf-Q9N" secondAttribute="leading" id="3lR-6y-Uot"/>
-                            <constraint firstItem="cS9-ex-71k" firstAttribute="top" secondItem="dUv-Gf-Q9N" secondAttribute="top" id="IIm-aA-vSy"/>
+                            <constraint firstAttribute="trailing" secondItem="IkI-Zg-jVH" secondAttribute="trailing" id="9I3-Zm-Ob0"/>
+                            <constraint firstItem="cS9-ex-71k" firstAttribute="leading" secondItem="dUv-Gf-Q9N" secondAttribute="leading" id="DMy-lq-fUg"/>
                             <constraint firstItem="glG-8q-nKr" firstAttribute="leading" secondItem="dUv-Gf-Q9N" secondAttribute="leading" id="LB2-iU-t5z"/>
-                            <constraint firstAttribute="trailing" secondItem="cS9-ex-71k" secondAttribute="trailing" id="MkJ-gb-gOG"/>
                             <constraint firstAttribute="trailing" secondItem="glG-8q-nKr" secondAttribute="trailing" id="MxT-Ql-e4c"/>
+                            <constraint firstAttribute="trailing" secondItem="cS9-ex-71k" secondAttribute="trailing" id="NSC-WS-VGV"/>
                             <constraint firstItem="Jwi-yq-A6S" firstAttribute="top" secondItem="glG-8q-nKr" secondAttribute="bottom" id="Nyk-WE-ini"/>
-                            <constraint firstItem="glG-8q-nKr" firstAttribute="top" secondItem="FUz-ue-5BK" secondAttribute="bottom" constant="139" id="aTC-qj-i10"/>
-                            <constraint firstItem="glG-8q-nKr" firstAttribute="top" secondItem="cS9-ex-71k" secondAttribute="bottom" id="fq3-ef-Q3Y"/>
+                            <constraint firstItem="cS9-ex-71k" firstAttribute="top" secondItem="IkI-Zg-jVH" secondAttribute="bottom" id="RAY-d7-lZs"/>
+                            <constraint firstItem="glG-8q-nKr" firstAttribute="top" secondItem="cS9-ex-71k" secondAttribute="bottom" id="SYJ-FB-tyJ"/>
+                            <constraint firstItem="nwG-ao-NaX" firstAttribute="leading" secondItem="dUv-Gf-Q9N" secondAttribute="leading" id="UWV-zt-epr"/>
+                            <constraint firstItem="Jwi-yq-A6S" firstAttribute="top" secondItem="nwG-ao-NaX" secondAttribute="bottom" id="Zqb-O3-mST"/>
+                            <constraint firstItem="glG-8q-nKr" firstAttribute="top" secondItem="FUz-ue-5BK" secondAttribute="bottom" constant="185" id="aTC-qj-i10"/>
+                            <constraint firstItem="IkI-Zg-jVH" firstAttribute="leading" secondItem="dUv-Gf-Q9N" secondAttribute="leading" id="dSw-cg-hZh"/>
+                            <constraint firstAttribute="trailing" secondItem="nwG-ao-NaX" secondAttribute="trailing" id="o7Y-Av-a1m"/>
+                            <constraint firstItem="IkI-Zg-jVH" firstAttribute="top" secondItem="dUv-Gf-Q9N" secondAttribute="top" constant="5" id="oDv-SV-wvY"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="bottomButton" destination="U6I-s0-7e9" id="4pM-fc-9Ed"/>
                         <outlet property="collectionView" destination="glG-8q-nKr" id="q5J-El-vCK"/>
                         <outlet property="map" destination="cS9-ex-71k" id="mkN-ah-Vh6"/>
                     </connections>

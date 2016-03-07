@@ -54,17 +54,13 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
             
             searchPhotos(coordinate.latitude, lon: coordinate.longitude)
             
-            let _ = Pin(latitude: coordinate.latitude, longitude: coordinate.longitude, context: sharedContext)
-            
-            saveContext()
-            
             map.addAnnotation(annotation)
         }
         
     }
     
     func dropAllPins() {
-        
+        print("Dropping saved pins, pin count: \(pins.count)")
         for pin in pins {
             
             let coordinate = CLLocationCoordinate2DMake(pin.latitude, pin.longitude)
@@ -79,9 +75,23 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
         print("SearchPhotos in Map")
         Flickr.sharedInstance().searchByLatLon(lat, longitude: lon) { (result, error) -> Void in
             
-            if result != nil {
-                print("Got result")
-            }
+            performUIUpdatesOnMain({ () -> Void in
+                if let imageDictionary = result {
+                    //print("Got result \(imageDictionary.keys)")
+                    
+                    let pin = Pin(latitude: lat, longitude: lon, context: self.sharedContext)
+                    self.pins.append(pin)
+                    print("Pins count: \(self.pins.count)")
+                    for (key, value) in imageDictionary {
+                        //print("Key: \(key)")
+                        //print("Value: \(value)")
+                        let photo = Photo(imageUrl: key, imageData: value, context: self.sharedContext)
+                        photo.pin = pin
+                    }
+                    self.saveContext()
+                }
+            })
+            
         }
     }
     
@@ -95,17 +105,12 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
         let latitude = NSUserDefaults.standardUserDefaults().doubleForKey(latKey)
         let longitude = NSUserDefaults.standardUserDefaults().doubleForKey(lonKey)
         
-        //let latitude: CLLocationDegrees = 34.192
-        //let longitude: CLLocationDegrees = -118.439
-        //let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-        
         let latDelta: CLLocationDegrees = 0.2 // the smaller the more zoomed in
         let lonDelta: CLLocationDegrees = 0.2
         
         let span = MKCoordinateSpanMake(latDelta, lonDelta)
         let location = CLLocationCoordinate2DMake(latitude, longitude)
         let region = MKCoordinateRegionMake(location, span)
-        //map.setCenterCoordinate(coordinate, animated: true)
         map.setRegion(region, animated: false)
     }
     
@@ -116,6 +121,7 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
     }
     
     func fetchAllPins() -> [Pin] {
+        print("Fetching pins")
         let fetchRequest = NSFetchRequest(entityName: "Pin")
         
         do {
@@ -136,7 +142,7 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
         //print("Region changed")
         // Called whenever the view or zoom level changes
         let region = map.region.center
-        let span = map.region.span
+        //let span = map.region.span
         //print("Region: \(region)")
         //print("Span: \(span)")
         
@@ -148,6 +154,13 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
         print("Selected pin")
         
         let controller = storyboard!.instantiateViewControllerWithIdentifier("PhotoAlbumCollectionVC") as! PhotoAlbumCollectionVC
+        
+        for pin in pins {
+            if pin.latitude == view.annotation!.coordinate.latitude {
+                controller.pin = pin
+                print("The pin to send: \(pin.latitude)")
+            }
+        }
         
         presentViewController(controller, animated: true, completion: nil)
     }
