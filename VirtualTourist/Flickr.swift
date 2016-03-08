@@ -21,6 +21,40 @@ class Flickr {
     
     //  https:api.flickr.com/services/rest/?method=flickr.photos.search&api_key=88569b3c55687dd564daf5dca5234002&lat=34&lon=-118&format=json&nojsoncallback=1&auth_token=72157662933309284-7a0c20512f3f9569&api_sig=8cbb9c5524e1e03fc71dbbbf492ac218
     
+    func taskForLocation(latitude: Double, longitude: Double, completionHandler: CompletionHandler) -> NSURLSessionDataTask {
+        
+        var urlString = Constants.URLForPhotoSearch
+        urlString = urlString.stringByReplacingOccurrencesOfString("APIKey'", withString: Constants.APIKey)
+        urlString = urlString.stringByReplacingOccurrencesOfString("latitude", withString: "\(latitude)")
+        urlString = urlString.stringByReplacingOccurrencesOfString("longitude", withString: "\(longitude)")
+        print("URLString: \(urlString)")
+        
+        let url = NSURL(string: urlString)!
+        let request = NSURLRequest(URL: url)
+        let task = session.dataTaskWithRequest(request) { (data, response, error) -> Void in
+            
+            func sendError(error: String) {
+                print(error)
+                completionHandler(result: nil, error: "No result. Sending error")
+            }
+            
+            guard (error == nil) else {
+                sendError("There was an error with the request")
+                return
+            }
+            
+            guard let data = data else {
+                sendError("No data was returned")
+                return
+            }
+            print("Data was returned")
+            
+        }
+        task.resume()
+        return task
+        
+    }
+    
     func searchByLatLon(latitude: Double, longitude: Double, completionHandlerForLatLon: CompletionHandler) {
         print("Search by Lat Lon")
                 

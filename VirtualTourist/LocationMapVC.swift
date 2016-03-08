@@ -29,6 +29,11 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
         setupMap()
         pins = fetchAllPins()
         
+        // TESTING Purposes
+        Flickr.sharedInstance().taskForLocation(118, longitude: 34) { (result, error) -> Void in
+            
+        }
+        
     }
     
     override func viewWillAppear(animated: Bool) {
