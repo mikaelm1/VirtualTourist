@@ -61,7 +61,7 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
             pins.append(pin)
             
             searchPhotos(coordinate.latitude, lon: coordinate.longitude, pin: pin)
-            
+            saveContext()
             map.addAnnotation(annotation)
         }
         
@@ -83,21 +83,47 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
         print("SearchPhotos in Map")
         Flickr.sharedInstance().taskForLocation(lat, longitude: lon) { (result, error) -> Void in
             
-            performUIUpdatesOnMain({ () -> Void in
-                if let imageDictionary = result {
-                    //print("Got result \(imageDictionary.keys)")
-    
-                    print("Pins count: \(self.pins.count)")
-                    for (key, value) in imageDictionary {
-                        //print("Key: \(key)")
-                        //print("Value: \(value)")
-                        let photo = Photo(imageUrl: key, imageData: value, context: self.sharedContext)
-                        photo.pin = pin
-                    }
-                    self.saveContext()
+            if let parsedResult = result {
+                guard let photos = parsedResult["photos"] as? [String: AnyObject] else {
+                    return
                 }
-            })
-            
+                //print(photos.count)
+                //print("Photos \(photos)")
+                
+                guard let photosArrayOfDicts = photos["photo"] as? [[String: AnyObject]] else {
+                    print("Unable to get photos key")
+                    return
+                }
+                //print(photosArrayOfDicts[0])
+                print("Count of photos returned: \(photosArrayOfDicts.count)")
+                
+                if photosArrayOfDicts.count == 0 {
+                    print("No photos Found. Search Again.")
+                    return
+                } else {
+                    
+                    for photoDictionary in photosArrayOfDicts{
+                        //let photo = photoDictionary as [String: AnyObject]
+                        
+                        guard let imageUrlString = photoDictionary["url_m"] as? String else {
+                            print("Could not find key: url_m")
+                            return
+                        }
+                        //print(imageUrlString)
+                        
+                        Flickr.sharedInstance().taskForImageWithUrl(imageUrlString, completionHandler: { (imageData, error) -> Void in
+                            
+                            if let imageData = imageData {
+                                let photo = Photo(imageUrl: imageUrlString, imageData: imageData, context: self.sharedContext)
+                                photo.pin = pin
+                            }
+                            
+                            
+                        })
+                    }
+                }
+                
+            }
         }
     }
     

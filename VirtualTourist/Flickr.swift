@@ -9,7 +9,7 @@
 import UIKit
 import CoreData
 
-typealias CompletionHandler = (result: [String: NSData]?, error: String?) -> Void
+typealias CompletionHandler = (result: AnyObject!, error: String?) -> Void
 
 class Flickr {
     
@@ -71,45 +71,23 @@ class Flickr {
         }
         //print("Parsed Results: \(parsedResult)")
         
-        guard let photos = parsedResult["photos"] as? [String: AnyObject] else {
-            sendError("Unable to get photos from JSON")
-            return
-        }
-        //print(photos.count)
-        //print("Photos \(photos)")
+        completionHandler(result: parsedResult, error: nil)
+    }
+    
+    func taskForImageWithUrl(url: String, completionHandler: (imageData: NSData?, error: NSError?) -> Void) -> NSURLSessionTask {
         
-        guard let photosArrayOfDicts = photos["photo"] as? [[String: AnyObject]] else {
-            sendError("Unable to get photos key")
-            return
-        }
-        //print(photosArrayOfDicts[0])
-        print("Count of photos returned: \(photosArrayOfDicts.count)")
+        let url = NSURL(string: url)!
         
-        if photosArrayOfDicts.count == 0 {
-            sendError("No photos Found. Search Again.")
-            return
-        } else {
+        let request = NSURLRequest(URL: url)
+        let task = NSURLSession.sharedSession().dataTaskWithRequest(request) { (data, response, error) -> Void in
             
-            var imageDictionary = [String: NSData]()
-            for photoDictionary in photosArrayOfDicts{
-                let photo = photoDictionary as [String: AnyObject]
-                
-                guard let imageUrlString = photo["url_m"] as? String else {
-                    sendError("Could not find key: url_m")
-                    return
-                }
-                //print(imageUrlString)
-                
-                let imageURL = NSURL(string: imageUrlString)
-                guard let imageData = NSData(contentsOfURL: imageURL!) else {
-                    sendError("Unable to get image data")
-                    return
-                    //let _ = Photo(imageUrl: imageUrlString, imageData: imageData, context: self.sharedContext)
-                }
-                imageDictionary[imageUrlString] = imageData
+            guard let imageData = data else {
+                completionHandler(imageData: nil, error: error)
+                return
             }
-            completionHandler(result: imageDictionary, error: nil)
+            completionHandler(imageData: imageData, error: nil)
         }
+        return task 
     }
     
     

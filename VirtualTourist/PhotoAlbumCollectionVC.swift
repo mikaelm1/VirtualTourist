@@ -81,12 +81,48 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
         print("SearchPhotos in Photo Album")
         Flickr.sharedInstance().taskForLocation(lat, longitude: lon) { (result, error) -> Void in
             
-            if let dictionaryOfPhotos = result {
-                for (key, value) in dictionaryOfPhotos {
-                    let photo = Photo(imageUrl: key, imageData: value, context: self.sharedContext)
-                    photo.pin = self.pin
-                    //self.pin.photos.append(photo)
+            if let parsedResult = result {
+                guard let photos = parsedResult["photos"] as? [String: AnyObject] else {
+                    return
                 }
+                //print(photos.count)
+                //print("Photos \(photos)")
+                
+                guard let photosArrayOfDicts = photos["photo"] as? [[String: AnyObject]] else {
+                    print("Unable to get photos key")
+                    return
+                }
+                //print(photosArrayOfDicts[0])
+                print("Count of photos returned: \(photosArrayOfDicts.count)")
+                
+                if photosArrayOfDicts.count == 0 {
+                    print("No photos Found. Search Again.")
+                    return
+                } else {
+                    
+                    for photoDictionary in photosArrayOfDicts{
+                        //let photo = photoDictionary as [String: AnyObject]
+                        
+                        guard let imageUrlString = photoDictionary["url_m"] as? String else {
+                            print("Could not find key: url_m")
+                            return
+                        }
+                        //print(imageUrlString)
+                        
+                        Flickr.sharedInstance().taskForImageWithUrl(imageUrlString, completionHandler: { (imageData, error) -> Void in
+                            
+                            if let imageData = imageData {
+                                let photo = Photo(imageUrl: imageUrlString, imageData: imageData, context: self.sharedContext)
+                                self.pin.photos.append(photo)
+                            } else {
+                                
+                            }
+                        })
+                        
+                        
+                    }
+                }
+
             }
         }
     }
@@ -134,18 +170,24 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
     
         let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
         //print("The photo is \(photo)")
-        configureCell(cell, atIndexPath: indexPath, withImage: photo)
+        configureCell(cell, atIndexPath: indexPath, withPhoto: photo)
  
         return cell
     }
     
     
-    func configureCell(cell: UICollectionViewCell, atIndexPath: NSIndexPath, withImage: Photo?) {
+    func configureCell(cell: UICollectionViewCell, atIndexPath: NSIndexPath, withPhoto: Photo?) {
         
-        if let photo = withImage {
+        if let photo = withPhoto {
+            print("Got Photo")
             let imagieView = UIImageView(image: UIImage(data: photo.imageData))
             cell.insertSubview(imagieView, atIndex: atIndexPath.item)
+        } else {
+            print("Didn't get photo")
+            let imageView = UIImageView(image: UIImage(named: "placeholder"))
+            cell.insertSubview(imageView, atIndex: atIndexPath.item)
         }
+        
         
         if pin.photos.isEmpty {
             print("The pin's photos array is empty")
@@ -173,7 +215,7 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
             selectedIndexPaths.append(indexPath)
         }
         
-        configureCell(cell, atIndexPath: indexPath, withImage: nil)
+        configureCell(cell, atIndexPath: indexPath, withPhoto: pin.photos[indexPath.item])
         
     }
 
