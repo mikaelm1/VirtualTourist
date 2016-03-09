@@ -57,7 +57,10 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
             let annotation = MKPointAnnotation()
             annotation.coordinate = coordinate
             
-            searchPhotos(coordinate.latitude, lon: coordinate.longitude)
+            let pin = Pin(latitude: annotation.coordinate.latitude, longitude: annotation.coordinate.longitude, context: sharedContext)
+            pins.append(pin)
+            
+            searchPhotos(coordinate.latitude, lon: coordinate.longitude, pin: pin)
             
             map.addAnnotation(annotation)
         }
@@ -76,16 +79,14 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
         }
     }
     
-    func searchPhotos(lat: Double, lon: Double) {
+    func searchPhotos(lat: Double, lon: Double, pin: Pin) {
         print("SearchPhotos in Map")
         Flickr.sharedInstance().taskForLocation(lat, longitude: lon) { (result, error) -> Void in
             
             performUIUpdatesOnMain({ () -> Void in
                 if let imageDictionary = result {
                     //print("Got result \(imageDictionary.keys)")
-                    
-                    let pin = Pin(latitude: lat, longitude: lon, context: self.sharedContext)
-                    self.pins.append(pin)
+    
                     print("Pins count: \(self.pins.count)")
                     for (key, value) in imageDictionary {
                         //print("Key: \(key)")
