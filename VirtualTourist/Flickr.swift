@@ -24,7 +24,6 @@ class Flickr {
     func taskForLocation(latitude: Double, longitude: Double, completionHandler: CompletionHandler) -> NSURLSessionDataTask {
         
         var urlString = Constants.URLForPhotoSearch
-        urlString = urlString.stringByReplacingOccurrencesOfString("APIKey'", withString: Constants.APIKey)
         urlString = urlString.stringByReplacingOccurrencesOfString("latitude", withString: "\(latitude)")
         urlString = urlString.stringByReplacingOccurrencesOfString("longitude", withString: "\(longitude)")
         print("URLString: \(urlString)")
@@ -47,92 +46,73 @@ class Flickr {
                 sendError("No data was returned")
                 return
             }
-            print("Data was returned")
+            //print("Data was returned")
+            
+            Flickr.parseJSONWithCompletionHandler(data, completionHandler: completionHandler)
             
         }
         task.resume()
         return task
-        
     }
     
-    func searchByLatLon(latitude: Double, longitude: Double, completionHandlerForLatLon: CompletionHandler) {
-        print("Search by Lat Lon")
-                
-        let url = NSURL(string: "https:api.flickr.com/services/rest/?method=flickr.photos.search&api_key=\(Constants.APIKey)&lat=\(latitude)&lon=\(longitude)&format=json&nojsoncallback=1&extras=url_m&per_page=12")!
-        
-        let request = NSMutableURLRequest(URL: url)
-        
-        let task = session.dataTaskWithRequest(request) { (data, response, error) -> Void in
-            
-            func sendError(error: String) {
-                print(error)
-                completionHandlerForLatLon(result: nil, error: "No result. Sending error")
-            }
-            
-            guard (error == nil) else {
-                sendError("There was an error with the request")
-                return
-            }
-            
-            guard let data = data else {
-                sendError("No data was returned")
-                return
-            }
-            
-            let parsedResult: AnyObject!
-            do {
-                parsedResult = try NSJSONSerialization.JSONObjectWithData(data, options: .AllowFragments)
-            } catch {
-                sendError("Unable to parse into JSON")
-                return
-            }
-            //print("Parsed Results: \(parsedResult)")
-            
-            guard let photos = parsedResult["photos"] as? [String: AnyObject] else {
-                sendError("Unable to get photos from JSON")
-                return
-            }
-            //print(photos.count)
-            //print(photos)
-            
-            guard let photosArrayOfDicts = photos["photo"] as? [[String: AnyObject]] else {
-                sendError("Unable to get photos key")
-                return
-            }
-            //print(photosArrayOfDicts[0])
-            print("Count of photos returned: \(photosArrayOfDicts.count)")
-            
-            if photosArrayOfDicts.count == 0 {
-                sendError("No photos Found. Search Again.")
-                return
-            } else {
-                
-                var imageDictionary = [String: NSData]()
-                for photoDictionary in photosArrayOfDicts{
-                    let photo = photoDictionary as [String: AnyObject]
-                    
-                    guard let imageUrlString = photo["url_m"] as? String else {
-                        sendError("Could not find key: url_m")
-                        return
-                    }
-                    //print(imageUrlString)
-                    
-                    let imageURL = NSURL(string: imageUrlString)
-                    guard let imageData = NSData(contentsOfURL: imageURL!) else {
-                        sendError("Unable to get image data")
-                        return
-                        //let _ = Photo(imageUrl: imageUrlString, imageData: imageData, context: self.sharedContext)
-                    }
-                    imageDictionary[imageUrlString] = imageData
-                }
-                completionHandlerForLatLon(result: imageDictionary, error: nil)
-                
-            }
-            
-        // end of closure
+    class func parseJSONWithCompletionHandler(data: NSData, completionHandler: CompletionHandler) {
+        print("parseJSONWithCompletionHandler")
+        func sendError(error: String) {
+            print(error)
+            completionHandler(result: nil, error: "No result. Sending error")
         }
-        task.resume()
+        
+        let parsedResult: AnyObject!
+        do {
+            parsedResult = try NSJSONSerialization.JSONObjectWithData(data, options: .AllowFragments)
+        } catch let error as NSError {
+            sendError("\(error)")
+            return
+        }
+        //print("Parsed Results: \(parsedResult)")
+        
+        guard let photos = parsedResult["photos"] as? [String: AnyObject] else {
+            sendError("Unable to get photos from JSON")
+            return
+        }
+        //print(photos.count)
+        //print("Photos \(photos)")
+        
+        guard let photosArrayOfDicts = photos["photo"] as? [[String: AnyObject]] else {
+            sendError("Unable to get photos key")
+            return
+        }
+        //print(photosArrayOfDicts[0])
+        print("Count of photos returned: \(photosArrayOfDicts.count)")
+        
+        if photosArrayOfDicts.count == 0 {
+            sendError("No photos Found. Search Again.")
+            return
+        } else {
+            
+            var imageDictionary = [String: NSData]()
+            for photoDictionary in photosArrayOfDicts{
+                let photo = photoDictionary as [String: AnyObject]
+                
+                guard let imageUrlString = photo["url_m"] as? String else {
+                    sendError("Could not find key: url_m")
+                    return
+                }
+                //print(imageUrlString)
+                
+                let imageURL = NSURL(string: imageUrlString)
+                guard let imageData = NSData(contentsOfURL: imageURL!) else {
+                    sendError("Unable to get image data")
+                    return
+                    //let _ = Photo(imageUrl: imageUrlString, imageData: imageData, context: self.sharedContext)
+                }
+                imageDictionary[imageUrlString] = imageData
+            }
+            completionHandler(result: imageDictionary, error: nil)
+        }
     }
+    
+    
     
     // MARK: Shared Instance
     class func sharedInstance() -> Flickr {

@@ -78,7 +78,7 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
     
     func searchPhotos(lat: Double, lon: Double) {
         print("SearchPhotos in Map")
-        Flickr.sharedInstance().searchByLatLon(lat, longitude: lon) { (result, error) -> Void in
+        Flickr.sharedInstance().taskForLocation(lat, longitude: lon) { (result, error) -> Void in
             
             performUIUpdatesOnMain({ () -> Void in
                 if let imageDictionary = result {

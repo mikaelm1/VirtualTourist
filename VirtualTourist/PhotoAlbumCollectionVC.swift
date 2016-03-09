@@ -79,7 +79,7 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
     
     func searchPhotos(lat: Double, lon: Double) {
         print("SearchPhotos in Photo Album")
-        Flickr.sharedInstance().searchByLatLon(lat, longitude: lon) { (result, error) -> Void in
+        Flickr.sharedInstance().taskForLocation(lat, longitude: lon) { (result, error) -> Void in
             
             if let dictionaryOfPhotos = result {
                 for (key, value) in dictionaryOfPhotos {
