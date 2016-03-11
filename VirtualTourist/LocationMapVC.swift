@@ -28,11 +28,7 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
         
         setupMap()
         pins = fetchAllPins()
-        
-        // TESTING Purposes
-        Flickr.sharedInstance().taskForLocation(118, longitude: 34) { (result, error) -> Void in
-            
-        }
+
         
     }
     
@@ -84,6 +80,7 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
         Flickr.sharedInstance().taskForLocation(lat, longitude: lon) { (result, error) -> Void in
             
             if let parsedResult = result {
+                print("Got parsed results")
                 guard let photos = parsedResult["photos"] as? [String: AnyObject] else {
                     return
                 }
@@ -102,28 +99,30 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
                     return
                 } else {
                     
-                    for photoDictionary in photosArrayOfDicts{
-                        //let photo = photoDictionary as [String: AnyObject]
-                        
-                        guard let imageUrlString = photoDictionary["url_m"] as? String else {
-                            print("Could not find key: url_m")
-                            return
-                        }
-                        //print(imageUrlString)
-                        
-                        Flickr.sharedInstance().taskForImageWithUrl(imageUrlString, completionHandler: { (imageData, error) -> Void in
-                            
-                            if let imageData = imageData {
-                                let photo = Photo(imageUrl: imageUrlString, imageData: imageData, context: self.sharedContext)
-                                photo.pin = pin
-                            }
-                            
-                            
-                        })
-                    }
+                    self.downloadImages(photosArrayOfDicts)
                 }
                 
             }
+        }
+    }
+    
+    func downloadImages(photoDictionaries: [[String: AnyObject]]) {
+        
+        print("Downlooding images")
+        for photoDictionary in photoDictionaries {
+            guard let imageUrlString = photoDictionary["url_m"] as? String else {
+                print("Could not find key: url_m")
+                return
+            }
+            
+            Flickr.sharedInstance().taskForImageWithUrl(imageUrlString, completionHandler: { (imageData, error) -> Void in
+                if let imageData = imageData {
+                    //let photo = Photo(imageUrl: imageUrlString, imageData: imageData, context: self.sharedContext)
+                    print("Created photo")
+                    //photo.pin = pin
+                    //pin.photos.append(photo)
+                }
+            })
         }
     }
     

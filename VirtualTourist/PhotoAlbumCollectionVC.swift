@@ -33,7 +33,7 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
         let fetchRequest = NSFetchRequest(entityName: "Photo")
         fetchRequest.predicate = NSPredicate(format: "pin == %@", self.pin)
         fetchRequest.sortDescriptors = []
-        
+        //print("FetchRequest; \(fetchRequest)")
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedContext, sectionNameKeyPath: nil, cacheName: nil)
         fetchedResultsController.delegate = self
         return fetchedResultsController
@@ -51,7 +51,7 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
             print("Error perfroming fetch: \(error1)")
         }
         print("The pin's latitude is: \(pin.latitude)")
-        
+        print("Pin's photos: \(pin.photos)")
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -60,6 +60,12 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
         collectionView.reloadData()
         setUpMap()
         print("The pin's photos: \(pin.photos.count)")
+        if pin.photos.isEmpty {
+            
+            print("Pin's photos is empty")
+            searchPhotos(pin.latitude, lon: pin.longitude)
+        }
+        
     }
     
     override func viewDidLayoutSubviews() {
@@ -83,6 +89,7 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
             
             if let parsedResult = result {
                 guard let photos = parsedResult["photos"] as? [String: AnyObject] else {
+                    print("Unable to get value for key: photos")
                     return
                 }
                 //print(photos.count)
@@ -109,16 +116,12 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
                         }
                         //print(imageUrlString)
                         
-                        Flickr.sharedInstance().taskForImageWithUrl(imageUrlString, completionHandler: { (imageData, error) -> Void in
-                            
-                            if let imageData = imageData {
-                                let photo = Photo(imageUrl: imageUrlString, imageData: imageData, context: self.sharedContext)
-                                self.pin.photos.append(photo)
-                            } else {
-                                
-                            }
-                        })
+                        let photo = Photo(imageUrl: imageUrlString, imageData: nil, context: self.sharedContext)
+                        photo.pin = self.pin
                         
+                        performUIUpdatesOnMain({ () -> Void in
+                            self.collectionView.reloadData()
+                        })
                         
                     }
                 }
@@ -146,14 +149,12 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
         let region = MKCoordinateRegionMake(location, span)
         map.setRegion(region, animated: false)
     }
-    
-    func mapView(mapView: MKMapView, didAddAnnotationViews views: [MKAnnotationView]) {
-        
-    }
+
 
     // MARK: UICollectionViewDataSource
 
     func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
+        print("Number of sections: \(fetchedResultsController.sections!.count)")
         return fetchedResultsController.sections?.count ?? 0
     }
 
@@ -176,21 +177,29 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
     }
     
     
-    func configureCell(cell: UICollectionViewCell, atIndexPath: NSIndexPath, withPhoto: Photo?) {
+    func configureCell(cell: UICollectionViewCell, atIndexPath: NSIndexPath, withPhoto photo: Photo) {
         
-        if let photo = withPhoto {
-            print("Got Photo")
-            let imagieView = UIImageView(image: UIImage(data: photo.imageData))
+        print("Got Photo")
+        if photo.imageData == nil {
+            let imagieView = UIImageView(image: UIImage(named: "placeholder"))
             cell.insertSubview(imagieView, atIndex: atIndexPath.item)
-        } else {
+            
+        } else if photo.imageData != nil {
             print("Didn't get photo")
-            let imageView = UIImageView(image: UIImage(named: "placeholder"))
-            cell.insertSubview(imageView, atIndex: atIndexPath.item)
-        }
-        
-        
-        if pin.photos.isEmpty {
-            print("The pin's photos array is empty")
+            let imagieView = UIImageView(image: photo.imageData!)
+            cell.insertSubview(imagieView, atIndex: atIndexPath.item)
+        } else { // has image but not downloaded
+            let task = Flickr.sharedInstance().taskForImageWithUrl(photo.imageUrl, completionHandler: { (imageData, error) -> Void in
+                
+                if let data = imageData {
+                    let image = UIImage(data: data)
+                    photo.imageData = image
+                    
+                    performUIUpdatesOnMain({ () -> Void in
+                        cell.insertSubview(UIImageView(image: image), atIndex: atIndexPath.item)
+                    })
+                }
+            })
         }
         
         if let index = selectedIndexPaths.indexOf(atIndexPath) {

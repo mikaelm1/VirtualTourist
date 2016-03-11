@@ -26,7 +26,7 @@ class Flickr {
         var urlString = Constants.URLForPhotoSearch
         urlString = urlString.stringByReplacingOccurrencesOfString("latitude", withString: "\(latitude)")
         urlString = urlString.stringByReplacingOccurrencesOfString("longitude", withString: "\(longitude)")
-        print("URLString: \(urlString)")
+        //print("URLString: \(urlString)")
         
         let url = NSURL(string: urlString)!
         let request = NSURLRequest(URL: url)
@@ -56,7 +56,7 @@ class Flickr {
     }
     
     class func parseJSONWithCompletionHandler(data: NSData, completionHandler: CompletionHandler) {
-        print("parseJSONWithCompletionHandler")
+        //print("parseJSONWithCompletionHandler")
         func sendError(error: String) {
             print(error)
             completionHandler(result: nil, error: "No result. Sending error")
@@ -81,7 +81,13 @@ class Flickr {
         let request = NSURLRequest(URL: url)
         let task = NSURLSession.sharedSession().dataTaskWithRequest(request) { (data, response, error) -> Void in
             
+            guard (error == nil) else {
+                print("There was an error with the task for image")
+                return 
+            }
+            
             guard let imageData = data else {
+                print("Returning error to completion handler")
                 completionHandler(imageData: nil, error: error)
                 return
             }
