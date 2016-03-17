@@ -93,6 +93,7 @@ class Flickr {
             }
             completionHandler(imageData: imageData, error: nil)
         }
+        task.resume()
         return task 
     }
     

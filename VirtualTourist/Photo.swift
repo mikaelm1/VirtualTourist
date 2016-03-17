@@ -12,14 +12,14 @@ import CoreData
 class Photo: NSManagedObject {
     
     @NSManaged var imageUrl: String
-    @NSManaged var imageData: UIImage?
+    @NSManaged var imageData: NSData?
     @NSManaged var pin: Pin
     
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
         super.init(entity: entity, insertIntoManagedObjectContext: context)
     }
     
-    convenience init(imageUrl: String, imageData:UIImage?, context: NSManagedObjectContext) {
+    convenience init(imageUrl: String, imageData: NSData?, context: NSManagedObjectContext) {
         let entity = NSEntityDescription.entityForName("Photo", inManagedObjectContext: context)!
         
         self.init(entity: entity, insertIntoManagedObjectContext: context)

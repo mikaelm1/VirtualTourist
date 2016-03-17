@@ -99,14 +99,14 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
                     return
                 } else {
                     
-                    self.downloadImages(photosArrayOfDicts)
+                    self.downloadImages(photosArrayOfDicts, forPin: pin)
                 }
                 
             }
         }
     }
     
-    func downloadImages(photoDictionaries: [[String: AnyObject]]) {
+    func downloadImages(photoDictionaries: [[String: AnyObject]], forPin: Pin) {
         
         print("Downlooding images")
         for photoDictionary in photoDictionaries {
@@ -114,13 +114,17 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
                 print("Could not find key: url_m")
                 return
             }
-            
+            print("Got image url")
             Flickr.sharedInstance().taskForImageWithUrl(imageUrlString, completionHandler: { (imageData, error) -> Void in
                 if let imageData = imageData {
-                    //let photo = Photo(imageUrl: imageUrlString, imageData: imageData, context: self.sharedContext)
-                    print("Created photo")
-                    //photo.pin = pin
-                    //pin.photos.append(photo)
+                    performUIUpdatesOnMain({ () -> Void in
+                        let photo = Photo(imageUrl: imageUrlString, imageData: imageData, context: self.sharedContext)
+                        photo.pin = forPin
+                        print("Created photo")
+                        //photo.pin = pin
+                        //pin.photos.append(photo)
+                    })
+                    
                 }
             })
         }
