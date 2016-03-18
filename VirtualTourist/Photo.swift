@@ -24,10 +24,20 @@ class Photo: NSManagedObject {
         
         self.init(entity: entity, insertIntoManagedObjectContext: context)
         
+        let path = pathForUrl(imageUrl)
+        
         self.imageUrl = imageUrl
         if let data = imageData {
-            self.imageData = data 
+            self.imageData = data
+            NSKeyedArchiver.archiveRootObject(data, toFile: path)
         }
+    }
+    
+    func pathForUrl(url: String) -> String {
+        let documentsDirectoryUrl = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first!
+        let fullUrl = documentsDirectoryUrl.URLByAppendingPathComponent(url)
+        
+        return fullUrl.path!
     }
     
 }
