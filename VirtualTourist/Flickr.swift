@@ -23,9 +23,12 @@ class Flickr {
     
     func taskForLocation(latitude: Double, longitude: Double, completionHandler: CompletionHandler) -> NSURLSessionDataTask {
         
+        let pageNumber = arc4random_uniform(100)
+        print("Random page number: \(pageNumber)")
         var urlString = Constants.URLForPhotoSearch
         urlString = urlString.stringByReplacingOccurrencesOfString("latitude", withString: "\(latitude)")
         urlString = urlString.stringByReplacingOccurrencesOfString("longitude", withString: "\(longitude)")
+        urlString = urlString.stringByReplacingOccurrencesOfString("pageNumber", withString: "\(pageNumber)")
         //print("URLString: \(urlString)")
         
         let url = NSURL(string: urlString)!
