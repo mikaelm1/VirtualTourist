@@ -28,12 +28,13 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
         
         setupMap()
         pins = fetchAllPins()
-
+        dropAllPins()
         
     }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
+        removeAllPins()
         dropAllPins()
     }
     
@@ -73,6 +74,11 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
             
             map.addAnnotation(annotation)
         }
+    }
+    
+    func removeAllPins() {
+        print("Removing annotations")
+        map.removeAnnotations(map.annotations)
     }
     
     func searchPhotos(lat: Double, lon: Double, pin: Pin) {
