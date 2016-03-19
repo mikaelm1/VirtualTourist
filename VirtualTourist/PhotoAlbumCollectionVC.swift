@@ -306,6 +306,7 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
         for photo in fetchedResultsController.fetchedObjects as! [Photo] {
             sharedContext.deleteObject(photo)
         }
+        saveContext()
     }
     
     func deleteSelectedPhotos() {
@@ -316,6 +317,7 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
         }
         selectedIndexPaths = [NSIndexPath]()
         updateButton()
+        saveContext()
     }
     
     func updateButton() {
@@ -324,6 +326,10 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
         } else {
             bottomButton.title = Constants.newCollection
         }
+    }
+    
+    func saveContext() {
+        CoreDataStackManager.sharedInstance().saveContext()
     }
     
     
