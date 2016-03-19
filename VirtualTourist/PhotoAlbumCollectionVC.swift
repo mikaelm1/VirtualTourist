@@ -166,6 +166,7 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
         return fetchedResultsController.sections?.count ?? 0
     }
 
+    
 
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         let sectionInfo = fetchedResultsController.sections![section]
@@ -175,8 +176,11 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
 
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         print("Setting up cell at indexPath \(indexPath.row)")
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("Cell", forIndexPath: indexPath)
-    
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("Cell", forIndexPath: indexPath) as! PhotoAlbumCell
+        
+        cell.imageView.image = UIImage(named: "placeholder")
+        cell.backgroundColor = UIColor.whiteColor()
+        
         let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
         //print("The photo is \(photo)")
         configureCell(cell, atIndexPath: indexPath, withPhoto: photo)
@@ -185,26 +189,20 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
     }
     
     
-    func configureCell(cell: UICollectionViewCell, atIndexPath: NSIndexPath, withPhoto photo: Photo) {
+    func configureCell(cell: PhotoAlbumCell, atIndexPath: NSIndexPath, withPhoto photo: Photo) {
         
-        //print("Got Photo")
-        if photo.imageData == nil {
-            print("Didn't get photo")
-            let imagieView = UIImageView(image: UIImage(named: "placeholder"))
-            cell.insertSubview(imagieView, atIndex: atIndexPath.item)
-            
-        } else if photo.imageData != nil {
+        if photo.imageData != nil {
             print("Got Photo")
-            let imagieView = UIImageView(image: UIImage(data: photo.imageData!))
-            cell.insertSubview(imagieView, atIndex: atIndexPath.item)
+            cell.imageView.image = UIImage(data: photo.imageData!)
         } else { // has image but not downloaded
+            cell.imageView.image = UIImage(named: "placeholder")
             let task = Flickr.sharedInstance().taskForImageWithUrl(photo.imageUrl, completionHandler: { (imageData, error) -> Void in
                 
                 if let data = imageData {
                     photo.imageData = data
                     
                     performUIUpdatesOnMain({ () -> Void in
-                        cell.insertSubview(UIImageView(image: UIImage(data: data)), atIndex: atIndexPath.item)
+                        cell.imageView.image = UIImage(data: data)
                     })
                 }
             })
@@ -224,7 +222,7 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         print("Selected item at: \(indexPath.item)")
         
-        let cell = collectionView.cellForItemAtIndexPath(indexPath)!
+        let cell = collectionView.cellForItemAtIndexPath(indexPath)! as! PhotoAlbumCell
         
         if let index = selectedIndexPaths.indexOf(indexPath) {
             selectedIndexPaths.removeAtIndex(index)

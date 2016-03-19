@@ -3,6 +3,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9530"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
         <!--Location MapVC-->
@@ -59,15 +60,29 @@
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="Cell" id="NEp-Rc-t2t">
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="Cell" id="NEp-Rc-t2t" customClass="PhotoAlbumCell" customModule="VirtualTourist" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="0.0" width="143" height="131"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
                                             <rect key="frame" x="0.0" y="0.0" width="143" height="131"/>
                                             <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="OeL-JC-Adh">
+                                                    <rect key="frame" x="13" y="13" width="117" height="105"/>
+                                                </imageView>
+                                            </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
                                         <color key="backgroundColor" red="0.18039215689999999" green="0.52941176469999995" blue="0.76470588240000004" alpha="1" colorSpace="calibratedRGB"/>
+                                        <constraints>
+                                            <constraint firstItem="OeL-JC-Adh" firstAttribute="top" secondItem="NEp-Rc-t2t" secondAttribute="topMargin" constant="5" id="1tb-DG-dWg"/>
+                                            <constraint firstAttribute="bottomMargin" secondItem="OeL-JC-Adh" secondAttribute="bottom" constant="5" id="JkU-23-glU"/>
+                                            <constraint firstItem="OeL-JC-Adh" firstAttribute="leading" secondItem="NEp-Rc-t2t" secondAttribute="leadingMargin" constant="5" id="ROF-DI-rAH"/>
+                                            <constraint firstAttribute="trailingMargin" secondItem="OeL-JC-Adh" secondAttribute="trailing" constant="5" id="wUx-W4-BYa"/>
+                                        </constraints>
+                                        <connections>
+                                            <outlet property="imageView" destination="OeL-JC-Adh" id="LuC-iW-GtW"/>
+                                        </connections>
                                     </collectionViewCell>
                                 </cells>
                             </collectionView>

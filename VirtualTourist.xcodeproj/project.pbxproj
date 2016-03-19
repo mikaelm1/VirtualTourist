@@ -21,6 +21,7 @@
 		707BDB2E1C85D120000963A1 /* GCDBlackBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 707BDB2D1C85D120000963A1 /* GCDBlackBox.swift */; };
 		707BDB311C85D5B7000963A1 /* PhotoAlbumCollectionVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 707BDB301C85D5B7000963A1 /* PhotoAlbumCollectionVC.swift */; };
 		707BDB331C876AD5000963A1 /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 707BDB321C876AD5000963A1 /* Photo.swift */; };
+		707BDB3E1C9DB7D7000963A1 /* PhotoAlbumCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 707BDB3D1C9DB7D7000963A1 /* PhotoAlbumCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,6 +53,7 @@
 		707BDB2D1C85D120000963A1 /* GCDBlackBox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GCDBlackBox.swift; sourceTree = "<group>"; };
 		707BDB301C85D5B7000963A1 /* PhotoAlbumCollectionVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoAlbumCollectionVC.swift; sourceTree = "<group>"; };
 		707BDB321C876AD5000963A1 /* Photo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
+		707BDB3D1C9DB7D7000963A1 /* PhotoAlbumCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoAlbumCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -132,6 +134,7 @@
 				707BDB291C853DCF000963A1 /* Constants.swift */,
 				707BDB2B1C853FF3000963A1 /* Pin.swift */,
 				707BDB321C876AD5000963A1 /* Photo.swift */,
+				707BDB3D1C9DB7D7000963A1 /* PhotoAlbumCell.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -256,6 +259,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				707BDB2E1C85D120000963A1 /* GCDBlackBox.swift in Sources */,
+				707BDB3E1C9DB7D7000963A1 /* PhotoAlbumCell.swift in Sources */,
 				707BDB2C1C853FF3000963A1 /* Pin.swift in Sources */,
 				705A71151C84ACDC001222D2 /* LocationMapVC.swift in Sources */,
 				707BDB311C85D5B7000963A1 /* PhotoAlbumCollectionVC.swift in Sources */,
