@@ -99,7 +99,7 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
     
     func downloadImageForPhoto(photo: Photo, cell: PhotoAlbumCell) {
         cell.activityIndicator.startAnimating()
-        cell.activityIndicator.hidden = false
+        //cell.activityIndicator.hidden = false
         let path = photo.filePath
         let task = NSURLSession.sharedSession().dataTaskWithURL(NSURL(string: photo.imageUrl)!) { (data, response, error) -> Void in
             
@@ -113,7 +113,7 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
             performUIUpdatesOnMain({ () -> Void in
                 cell.imageView.image = UIImage(data: data)
                 cell.activityIndicator.stopAnimating()
-                cell.activityIndicator.hidden = true
+                //cell.activityIndicator.hidden = true
             })
             print("Saved to Documents Directory")
         }
