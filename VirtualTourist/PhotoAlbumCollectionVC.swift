@@ -94,23 +94,21 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
                 photos = result!
                 performUIUpdatesOnMain({ () -> Void in
                     self.saveContext()
-
                 })
             }
         }
         return photos
     }
     
-    func downloadImageForPhoto(photo: Photo) -> UIImage {
-        let imageData = NSData(contentsOfURL: NSURL(string: photo.imageUrl)!)
-        let path = pathForUrl(NSURL(string: photo.imageUrl)!.lastPathComponent!)
-        do {
-            try photo.imageUrl.writeToFile(path, atomically: true, encoding: NSStringEncoding())
-            print("Saved to Documents Directory")
-        } catch {
-            
-        }
-        return UIImage(data: imageData!)!
+    func downloadImageForPhoto(photo: Photo) {
+        var imageData = NSData()
+        imageData = NSData(contentsOfURL: NSURL(string: photo.imageUrl)!)!
+        let path = self.pathForUrl(NSURL(string: photo.imageUrl)!.lastPathComponent!)
+        
+        imageData.writeToFile(path, atomically: true)
+        photo.imageData = imageData
+        print("Saved to Documents Directory")
+
     }
     
     func deletePhoto(photo: Photo) {
@@ -119,7 +117,7 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
             try NSFileManager.defaultManager().removeItemAtPath(path)
             print("Deleted from Documents Directory")
         } catch {
-            print("Photo was not deleted from File Manager")
+            print("Photo was not deleted from File Manager: \(error)")
         }
     }
     
@@ -182,13 +180,17 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
     func configureCell(cell: PhotoAlbumCell, atIndexPath indexPath: NSIndexPath) {
         print("Count of photos in Pin's array of photos: \(pin.photos.count)")
         
-        cell.imageView.image = UIImage(named: "placeholder")
         let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
-        performUIUpdatesOnMain { () -> Void in
-            let image = self.downloadImageForPhoto(photo)
-            cell.imageView.image = image
+        if photo.imageData == nil {
+            cell.imageView.image = UIImage(named: "placeholder")
+            performUIUpdatesOnMain({ () -> Void in
+                self.downloadImageForPhoto(photo)
+                cell.imageView.image = UIImage(data: photo.imageData!)
+            })
+        } else {
+            cell.imageView.image = UIImage(data: photo.imageData!)
         }
-        
+        //collectionView.reloadData()
         if let _ = selectedIndexPaths.indexOf(indexPath) {
             cell.alpha = 0.5
         } else {
