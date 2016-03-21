@@ -96,30 +96,6 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
         return photos
     }
     
-//    func downloadImages(photoDictionaries: [[String: AnyObject]], forPin: Pin) {
-//        
-//        print("Downlooding images")
-//        for photoDictionary in photoDictionaries {
-//            guard let imageUrlString = photoDictionary["url_m"] as? String else {
-//                print("Could not find key: url_m")
-//                return
-//            }
-//            print("Got image url")
-//            Flickr.sharedInstance().taskForImageWithUrl(imageUrlString, completionHandler: { (imageData, error) -> Void in
-//                if let imageData = imageData {
-//                    performUIUpdatesOnMain({ () -> Void in
-//                        let photo = Photo(imageUrl: imageUrlString, imageData: imageData, context: self.sharedContext)
-//                        photo.pin = forPin
-//                        print("Created photo")
-//                        //photo.pin = pin
-//                        //pin.photos.append(photo)
-//                    })
-//                    
-//                }
-//            })
-//        }
-//    }
-    
     func setupMap() {
         map.delegate = self
         
