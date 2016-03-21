@@ -97,7 +97,9 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
         return photos
     }
     
-    func downloadImageForPhoto(photo: Photo) {
+    func downloadImageForPhoto(photo: Photo, cell: PhotoAlbumCell) {
+        cell.activityIndicator.startAnimating()
+        cell.activityIndicator.hidden = false
         let path = photo.filePath
         let task = NSURLSession.sharedSession().dataTaskWithURL(NSURL(string: photo.imageUrl)!) { (data, response, error) -> Void in
             
@@ -108,17 +110,15 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
             }
             photo.imageData = data
             data.writeToFile(path, atomically: true)
+            performUIUpdatesOnMain({ () -> Void in
+                cell.imageView.image = UIImage(data: data)
+                cell.activityIndicator.stopAnimating()
+                cell.activityIndicator.hidden = true
+            })
             print("Saved to Documents Directory")
         }
         task.resume()
 
-    }
-    
-    func pathForUrl(url: String) -> String {
-        let documentsDirectoryUrl = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first!
-        let fullUrl = documentsDirectoryUrl.URLByAppendingPathComponent(url)
-        
-        return fullUrl.path!
     }
     
     // MARK: Map View
@@ -176,11 +176,9 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
         let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
         cell.imageView.image = UIImage(named: "placeholder")
         if photo.imageData == nil {
-            downloadImageForPhoto(photo)
+            downloadImageForPhoto(photo, cell: cell)
         } else {
-            performUIUpdatesOnMain({ () -> Void in
-                cell.imageView.image = UIImage(data: photo.imageData!)
-            })
+            cell.imageView.image = UIImage(data: photo.imageData!)!
         }
         if let _ = selectedIndexPaths.indexOf(indexPath) {
             cell.alpha = 0.5
@@ -188,7 +186,6 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
             cell.alpha = 1
         }
         updateButton()
-        
     }
 
     // MARK: UICollectionViewDelegate

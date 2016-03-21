@@ -70,17 +70,23 @@
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="OeL-JC-Adh">
                                                     <rect key="frame" x="13" y="13" width="117" height="105"/>
                                                 </imageView>
+                                                <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="Abz-82-x7V">
+                                                    <rect key="frame" x="61" y="56" width="20" height="20"/>
+                                                </activityIndicatorView>
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <constraints>
                                             <constraint firstItem="OeL-JC-Adh" firstAttribute="top" secondItem="NEp-Rc-t2t" secondAttribute="topMargin" constant="5" id="1tb-DG-dWg"/>
+                                            <constraint firstItem="Abz-82-x7V" firstAttribute="centerY" secondItem="NEp-Rc-t2t" secondAttribute="centerY" id="JDZ-hm-orY"/>
                                             <constraint firstAttribute="bottomMargin" secondItem="OeL-JC-Adh" secondAttribute="bottom" constant="5" id="JkU-23-glU"/>
                                             <constraint firstItem="OeL-JC-Adh" firstAttribute="leading" secondItem="NEp-Rc-t2t" secondAttribute="leadingMargin" constant="5" id="ROF-DI-rAH"/>
                                             <constraint firstAttribute="trailingMargin" secondItem="OeL-JC-Adh" secondAttribute="trailing" constant="5" id="wUx-W4-BYa"/>
+                                            <constraint firstItem="Abz-82-x7V" firstAttribute="centerX" secondItem="NEp-Rc-t2t" secondAttribute="centerX" id="xp2-Jy-D9H"/>
                                         </constraints>
                                         <connections>
+                                            <outlet property="activityIndicator" destination="Abz-82-x7V" id="KSZ-E6-Q2t"/>
                                             <outlet property="imageView" destination="OeL-JC-Adh" id="LuC-iW-GtW"/>
                                         </connections>
                                     </collectionViewCell>
