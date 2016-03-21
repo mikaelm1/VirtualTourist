@@ -57,8 +57,9 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
-        collectionView.reloadData()
         setUpMap()
+
+        collectionView.reloadData()
         print("The pin's photos: \(pin.photos.count)")
         if pin.photos.count == 0 {
             print("Pin's photos is empty")
@@ -97,24 +98,20 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
     }
     
     func downloadImageForPhoto(photo: Photo) {
-        var imageData = NSData()
-        imageData = NSData(contentsOfURL: NSURL(string: photo.imageUrl)!)!
-        let path = self.pathForUrl(NSURL(string: photo.imageUrl)!.lastPathComponent!)
-        
-        imageData.writeToFile(path, atomically: true)
-        photo.imageData = imageData
-        print("Saved to Documents Directory")
-
-    }
-    
-    func deletePhoto(photo: Photo) {
-        let path = pathForUrl((NSURL(string: photo.imageUrl)?.lastPathComponent)!)
-        do {
-            try NSFileManager.defaultManager().removeItemAtPath(path)
-            print("Deleted from Documents Directory")
-        } catch {
-            print("Photo was not deleted from File Manager: \(error)")
+        let path = photo.filePath
+        let task = NSURLSession.sharedSession().dataTaskWithURL(NSURL(string: photo.imageUrl)!) { (data, response, error) -> Void in
+            
+            //print("Data :\(data)")
+            //print("Response :\(response)")
+            guard let data = data else {
+                return
+            }
+            photo.imageData = data
+            data.writeToFile(path, atomically: true)
+            print("Saved to Documents Directory")
         }
+        task.resume()
+
     }
     
     func pathForUrl(url: String) -> String {
@@ -128,19 +125,21 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
     
     func setUpMap() {
         map.delegate = self
+        performUIUpdatesOnMain { () -> Void in
+            let annotation = MKPointAnnotation()
+            annotation.coordinate.latitude = self.pin.latitude
+            annotation.coordinate.longitude = self.pin.longitude
+            self.map.addAnnotation(annotation)
+            
+            let latDelta: CLLocationDegrees = 0.2 // the smaller the more zoomed in
+            let lonDelta: CLLocationDegrees = 0.2
+            
+            let span = MKCoordinateSpanMake(latDelta, lonDelta)
+            let location = CLLocationCoordinate2DMake(self.pin.latitude, self.pin.longitude)
+            let region = MKCoordinateRegionMake(location, span)
+            self.map.setRegion(region, animated: false)
+        }
         
-        let annotation = MKPointAnnotation()
-        annotation.coordinate.latitude = pin.latitude
-        annotation.coordinate.longitude = pin.longitude
-        map.addAnnotation(annotation)
-        
-        let latDelta: CLLocationDegrees = 0.2 // the smaller the more zoomed in
-        let lonDelta: CLLocationDegrees = 0.2
-        
-        let span = MKCoordinateSpanMake(latDelta, lonDelta)
-        let location = CLLocationCoordinate2DMake(pin.latitude, pin.longitude)
-        let region = MKCoordinateRegionMake(location, span)
-        map.setRegion(region, animated: false)
     }
 
 
@@ -165,8 +164,6 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
         print("Setting up cell at indexPath \(indexPath.row)")
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("Cell", forIndexPath: indexPath) as! PhotoAlbumCell
 
-        //let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
-        //print("The photo is \(photo)")
         configureCell(cell, atIndexPath: indexPath)
  
         return cell
@@ -179,10 +176,7 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
         let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
         cell.imageView.image = UIImage(named: "placeholder")
         if photo.imageData == nil {
-            performUIUpdatesOnMain({ () -> Void in
-                self.downloadImageForPhoto(photo)
-                cell.imageView.image = UIImage(data: photo.imageData!)
-            })
+            downloadImageForPhoto(photo)
         } else {
             performUIUpdatesOnMain({ () -> Void in
                 cell.imageView.image = UIImage(data: photo.imageData!)
@@ -283,7 +277,6 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
     func deleteAllPhotos() {
         for photo in fetchedResultsController.fetchedObjects as! [Photo] {
             sharedContext.deleteObject(photo)
-            deletePhoto(photo)
         }
         saveContext()
     }
@@ -291,7 +284,6 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
     func deleteSelectedPhotos() {
         for indexPath in selectedIndexPaths {
             let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
-            deletePhoto(photo)
             sharedContext.deleteObject(photo)
         }
         selectedIndexPaths = [NSIndexPath]()
