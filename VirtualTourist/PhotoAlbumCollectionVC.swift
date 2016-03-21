@@ -51,7 +51,7 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
             print("Error perfroming fetch: \(error1)")
         }
         print("The pin's latitude is: \(pin.latitude)")
-        print("Pin's photos: \(pin.photos)")
+        //print("Pin's photos: \(pin.photos)")
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -115,7 +115,7 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
     }
     
     func downloadImages(photoDictionaries: [[String: AnyObject]]) {
-        
+        //pin.photos = [Photo]()
         print("Downlooding images")
         for photoDictionary in photoDictionaries {
             guard let imageUrlString = photoDictionary["url_m"] as? String else {
@@ -129,8 +129,7 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
                         let photo = Photo(imageUrl: imageUrlString, imageData: imageData, context: self.sharedContext)
                         photo.pin = self.pin
                         print("Created photo")
-                        //photo.pin = pin
-                        //pin.photos.append(photo)
+                        //self.pin.photos.append(photo)
                     })
                     
                 }
@@ -172,43 +171,51 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
         let sectionInfo = fetchedResultsController.sections![section]
         print("Number of cells: \(sectionInfo.numberOfObjects)")
         return sectionInfo.numberOfObjects
+        //return 12
+        
     }
 
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         print("Setting up cell at indexPath \(indexPath.row)")
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("Cell", forIndexPath: indexPath) as! PhotoAlbumCell
-        
-        cell.imageView.image = UIImage(named: "placeholder")
-        cell.backgroundColor = UIColor.whiteColor()
-        
-        let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
+
+        //let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
         //print("The photo is \(photo)")
-        configureCell(cell, atIndexPath: indexPath, withPhoto: photo)
+        configureCell(cell, atIndexPath: indexPath)
  
         return cell
     }
     
     
-    func configureCell(cell: PhotoAlbumCell, atIndexPath: NSIndexPath, withPhoto photo: Photo) {
-        
-        if photo.imageData != nil {
-            print("Got Photo")
-            cell.imageView.image = UIImage(data: photo.imageData!)
-        } else { // has image but not downloaded
+    func configureCell(cell: PhotoAlbumCell, atIndexPath indexPath: NSIndexPath) {
+        print("Count of photos in Pin's array of photos: \(pin.photos.count)")
+        if pin.photos.count < 12 {
             cell.imageView.image = UIImage(named: "placeholder")
-            let task = Flickr.sharedInstance().taskForImageWithUrl(photo.imageUrl, completionHandler: { (imageData, error) -> Void in
-                
-                if let data = imageData {
-                    photo.imageData = data
-                    
-                    performUIUpdatesOnMain({ () -> Void in
-                        cell.imageView.image = UIImage(data: data)
-                    })
-                }
+            //searchPhotos(pin.latitude, lon: pin.longitude)
+        } else {
+            let photo = pin.photos[indexPath.row]
+            print("Got Photo")
+            performUIUpdatesOnMain({ () -> Void in
+                cell.imageView.image = UIImage(data: photo.imageData!)
             })
-        }
+            
+        } 
+            //else { // has image but not downloaded
+//            //cell.imageView.image = UIImage(named: "placeholder")
+//            let photo = pin.photos[indexPath.row]
+//            let task = Flickr.sharedInstance().taskForImageWithUrl(photo.imageUrl, completionHandler: { (imageData, error) -> Void in
+//                
+//                if let data = imageData {
+//                    photo.imageData = data
+//                    
+//                    performUIUpdatesOnMain({ () -> Void in
+//                        cell.imageView.image = UIImage(data: data)
+//                    })
+//                }
+//            })
+//        }
         
-        if let index = selectedIndexPaths.indexOf(atIndexPath) {
+        if let index = selectedIndexPaths.indexOf(indexPath) {
             cell.alpha = 0.5
         } else {
             cell.alpha = 1
@@ -229,7 +236,7 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
         } else {
             selectedIndexPaths.append(indexPath)
         }
-        configureCell(cell, atIndexPath: indexPath, withPhoto: pin.photos[indexPath.item])
+        configureCell(cell, atIndexPath: indexPath)
         
     }
 

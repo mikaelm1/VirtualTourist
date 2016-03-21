@@ -23,10 +23,10 @@ class Photo: NSManagedObject {
         let entity = NSEntityDescription.entityForName("Photo", inManagedObjectContext: context)!
         
         self.init(entity: entity, insertIntoManagedObjectContext: context)
-        
+        self.imageUrl = imageUrl
+
         let path = pathForUrl(NSURL(string: imageUrl)!.lastPathComponent!)
         
-        self.imageUrl = imageUrl
         if let data = imageData {
             self.imageData = data
             data.writeToFile(path, atomically: true)
