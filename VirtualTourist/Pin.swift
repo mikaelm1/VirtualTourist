@@ -13,7 +13,7 @@ class Pin: NSManagedObject {
     
     @NSManaged var latitude: Double
     @NSManaged var longitude: Double
-    @NSManaged var photos: [Photo]
+    @NSManaged var photos: NSSet
     
     
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
@@ -28,6 +28,7 @@ class Pin: NSManagedObject {
         
         self.latitude = latitude
         self.longitude = longitude
+        
     }
     
 }

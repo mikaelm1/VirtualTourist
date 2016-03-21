@@ -12,6 +12,7 @@ import CoreData
 class Photo: NSManagedObject {
     
     @NSManaged var imageUrl: String
+    @NSManaged var filePath: String?
     @NSManaged var imageData: NSData?
     @NSManaged var pin: Pin
     
@@ -19,7 +20,7 @@ class Photo: NSManagedObject {
         super.init(entity: entity, insertIntoManagedObjectContext: context)
     }
     
-    convenience init(imageUrl: String, imageData: NSData?, context: NSManagedObjectContext) {
+    convenience init(imageUrl: String, context: NSManagedObjectContext) {
         let entity = NSEntityDescription.entityForName("Photo", inManagedObjectContext: context)!
         
         self.init(entity: entity, insertIntoManagedObjectContext: context)
@@ -33,6 +34,16 @@ class Photo: NSManagedObject {
         }
     }
     
+    
+    
+    override func prepareForDeletion() {
+        let path = pathForUrl((NSURL(string: self.imageUrl)?.lastPathComponent)!)
+        do {
+            try NSFileManager.defaultManager().removeItemAtPath(path)
+        } catch {
+            print("Photo was not deleted from File Manager")
+        }
+    }
     
     func pathForUrl(url: String) -> String {
         let documentsDirectoryUrl = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first!

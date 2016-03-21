@@ -57,7 +57,8 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
             let pin = Pin(latitude: annotation.coordinate.latitude, longitude: annotation.coordinate.longitude, context: sharedContext)
             pins.append(pin)
             
-            searchPhotos(coordinate.latitude, lon: coordinate.longitude, pin: pin)
+            let photos = getPhotosForLoaction(pin)
+            pin.photos.setByAddingObjectsFromArray(photos)
             saveContext()
             map.addAnnotation(annotation)
         }
@@ -81,60 +82,43 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
         map.removeAnnotations(map.annotations)
     }
     
-    func searchPhotos(lat: Double, lon: Double, pin: Pin) {
+    func getPhotosForLoaction(pin: Pin) -> [Photo] {
         print("SearchPhotos in Map")
-        Flickr.sharedInstance().taskForLocation(lat, longitude: lon) { (result, error) -> Void in
+        var photos = [Photo]()
+        Flickr.sharedInstance().taskForLocation(pin) { (result, error) -> Void in
             
-            if let parsedResult = result {
-                print("Got parsed results")
-                guard let photos = parsedResult["photos"] as? [String: AnyObject] else {
-                    return
-                }
-                //print(photos.count)
-                //print("Photos \(photos)")
-                
-                guard let photosArrayOfDicts = photos["photo"] as? [[String: AnyObject]] else {
-                    print("Unable to get photos key")
-                    return
-                }
-                //print(photosArrayOfDicts[0])
-                print("Count of photos returned: \(photosArrayOfDicts.count)")
-                
-                if photosArrayOfDicts.count == 0 {
-                    print("No photos Found. Search Again.")
-                    return
-                } else {
-                    
-                    self.downloadImages(photosArrayOfDicts, forPin: pin)
-                }
-                
+            if result == nil {
+                print(error)
+            } else {
+                photos = result!
             }
         }
+        return photos
     }
     
-    func downloadImages(photoDictionaries: [[String: AnyObject]], forPin: Pin) {
-        
-        print("Downlooding images")
-        for photoDictionary in photoDictionaries {
-            guard let imageUrlString = photoDictionary["url_m"] as? String else {
-                print("Could not find key: url_m")
-                return
-            }
-            print("Got image url")
-            Flickr.sharedInstance().taskForImageWithUrl(imageUrlString, completionHandler: { (imageData, error) -> Void in
-                if let imageData = imageData {
-                    performUIUpdatesOnMain({ () -> Void in
-                        let photo = Photo(imageUrl: imageUrlString, imageData: imageData, context: self.sharedContext)
-                        photo.pin = forPin
-                        print("Created photo")
-                        //photo.pin = pin
-                        //pin.photos.append(photo)
-                    })
-                    
-                }
-            })
-        }
-    }
+//    func downloadImages(photoDictionaries: [[String: AnyObject]], forPin: Pin) {
+//        
+//        print("Downlooding images")
+//        for photoDictionary in photoDictionaries {
+//            guard let imageUrlString = photoDictionary["url_m"] as? String else {
+//                print("Could not find key: url_m")
+//                return
+//            }
+//            print("Got image url")
+//            Flickr.sharedInstance().taskForImageWithUrl(imageUrlString, completionHandler: { (imageData, error) -> Void in
+//                if let imageData = imageData {
+//                    performUIUpdatesOnMain({ () -> Void in
+//                        let photo = Photo(imageUrl: imageUrlString, imageData: imageData, context: self.sharedContext)
+//                        photo.pin = forPin
+//                        print("Created photo")
+//                        //photo.pin = pin
+//                        //pin.photos.append(photo)
+//                    })
+//                    
+//                }
+//            })
+//        }
+//    }
     
     func setupMap() {
         map.delegate = self
@@ -174,10 +158,6 @@ class LocationMapVC: UIViewController, MKMapViewDelegate {
     }
     
     // MARK: - Map View Delegate
-    
-    func saveMapLocation() {
-        
-    }
     
     func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         //print("Region changed")

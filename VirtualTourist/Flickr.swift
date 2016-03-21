@@ -9,20 +9,19 @@
 import UIKit
 import CoreData
 
-typealias CompletionHandler = (result: AnyObject!, error: String?) -> Void
+typealias CompletionHandler = (result: [Photo]?, error: String?) -> Void
 
 class Flickr {
     
     let session = NSURLSession.sharedSession()
-    
-    lazy var sharedContext: NSManagedObjectContext = {
-        CoreDataStackManager.sharedInstance().managedObjectContext!
-    }()
+    let sharedContext = CoreDataStackManager.sharedInstance().managedObjectContext!
     
     //  https:api.flickr.com/services/rest/?method=flickr.photos.search&api_key=88569b3c55687dd564daf5dca5234002&lat=34&lon=-118&format=json&nojsoncallback=1&auth_token=72157662933309284-7a0c20512f3f9569&api_sig=8cbb9c5524e1e03fc71dbbbf492ac218
     
-    func taskForLocation(latitude: Double, longitude: Double, completionHandler: CompletionHandler) -> NSURLSessionDataTask {
+    func taskForLocation(pin: Pin, completionHandler: CompletionHandler) -> NSURLSessionDataTask {
         
+        let latitude = pin.latitude
+        let longitude = pin.longitude
         let pageNumber = arc4random_uniform(100)
         print("Random page number: \(pageNumber)")
         var urlString = Constants.URLForPhotoSearch
@@ -51,14 +50,14 @@ class Flickr {
             }
             //print("Data was returned")
             
-            Flickr.parseJSONWithCompletionHandler(data, completionHandler: completionHandler)
+            Flickr.parseJSONWithCompletionHandler(data, pin: pin, completionHandler: completionHandler)
             
         }
         task.resume()
         return task
     }
     
-    class func parseJSONWithCompletionHandler(data: NSData, completionHandler: CompletionHandler) {
+    class func parseJSONWithCompletionHandler(data: NSData, pin: Pin, completionHandler: CompletionHandler) {
         //print("parseJSONWithCompletionHandler")
         func sendError(error: String) {
             print(error)
@@ -73,10 +72,45 @@ class Flickr {
             return
         }
         //print("Parsed Results: \(parsedResult)")
-        
-        completionHandler(result: parsedResult, error: nil)
-    }
+        var photosToReturn = [Photo]()
+
+        if let parsedResult = parsedResult {
+            print("Got parsed results")
+            guard let photos = parsedResult["photos"] as? [String: AnyObject] else {
+                return
+            }
+            //print(photos.count)
+            //print("Photos \(photos)")
+            
+            guard let photosArrayOfDicts = photos["photo"] as? [[String: AnyObject]] else {
+                print("Unable to get photos key")
+                return
+            }
+            //print(photosArrayOfDicts[0])
+            print("Count of photos returned: \(photosArrayOfDicts.count)")
+            
+            if photosArrayOfDicts.count == 0 {
+                print("No photos Found. Search Again.")
+                completionHandler(result: nil, error: "No photos Found")
+                return
+            } else {
+                for photoDictionary in photosArrayOfDicts {
+                    guard let imageUrlString = photoDictionary["url_m"] as? String else {
+                        print("Could not find key: url_m")
+                        return
+                    }
+                    
+                    let photo = Photo(imageUrl: imageUrlString, context: sharedInstance().sharedContext)
+                    photo.pin = pin 
+                    photosToReturn.append(photo)
+                }
+            }
+            
+        }
     
+        completionHandler(result: photosToReturn, error: nil)
+    }
+
     func taskForImageWithUrl(url: String, completionHandler: (imageData: NSData?, error: NSError?) -> Void) -> NSURLSessionTask {
         
         let url = NSURL(string: url)!

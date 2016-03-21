@@ -134,7 +134,6 @@
 				707BDB291C853DCF000963A1 /* Constants.swift */,
 				707BDB2B1C853FF3000963A1 /* Pin.swift */,
 				707BDB321C876AD5000963A1 /* Photo.swift */,
-				707BDB3D1C9DB7D7000963A1 /* PhotoAlbumCell.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -151,6 +150,7 @@
 		707BDB341C8784DD000963A1 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				707BDB3D1C9DB7D7000963A1 /* PhotoAlbumCell.swift */,
 			);
 			name = View;
 			sourceTree = "<group>";

@@ -60,10 +60,10 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
         collectionView.reloadData()
         setUpMap()
         print("The pin's photos: \(pin.photos.count)")
-        if pin.photos.isEmpty {
+        if pin.photos.count == 0 {
             
             print("Pin's photos is empty")
-            searchPhotos(pin.latitude, lon: pin.longitude)
+            getPhotosForLoaction(pin)
         }
         
     }
@@ -83,59 +83,42 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
         collectionView.collectionViewLayout = layout
     }
     
-    func searchPhotos(lat: Double, lon: Double) {
-        print("SearchPhotos in Map")
-        Flickr.sharedInstance().taskForLocation(lat, longitude: lon) { (result, error) -> Void in
+    func getPhotosForLoaction(pin: Pin) -> [Photo] {
+        print("SearchPhotos in Album")
+        var photos = [Photo]()
+        Flickr.sharedInstance().taskForLocation(pin) { (result, error) -> Void in
             
-            if let parsedResult = result {
-                print("Got parsed results")
-                guard let photos = parsedResult["photos"] as? [String: AnyObject] else {
-                    return
-                }
-                //print(photos.count)
-                //print("Photos \(photos)")
-                
-                guard let photosArrayOfDicts = photos["photo"] as? [[String: AnyObject]] else {
-                    print("Unable to get photos key")
-                    return
-                }
-                //print(photosArrayOfDicts[0])
-                print("Count of photos returned: \(photosArrayOfDicts.count)")
-                
-                if photosArrayOfDicts.count == 0 {
-                    print("No photos Found. Search Again.")
-                    return
-                } else {
-                    
-                    self.downloadImages(photosArrayOfDicts)
-                }
-                
+            if result == nil {
+                print(error)
+            } else {
+                photos = result!
             }
         }
+        return photos
     }
     
-    func downloadImages(photoDictionaries: [[String: AnyObject]]) {
-        //pin.photos = [Photo]()
-        print("Downlooding images")
-        for photoDictionary in photoDictionaries {
-            guard let imageUrlString = photoDictionary["url_m"] as? String else {
-                print("Could not find key: url_m")
-                return
-            }
-            print("Got image url")
-            Flickr.sharedInstance().taskForImageWithUrl(imageUrlString, completionHandler: { (imageData, error) -> Void in
-                if let imageData = imageData {
-                    performUIUpdatesOnMain({ () -> Void in
-                        let photo = Photo(imageUrl: imageUrlString, imageData: imageData, context: self.sharedContext)
-                        photo.pin = self.pin
-                        print("Created photo")
-                        //self.pin.photos.append(photo)
-                    })
-                    
-                }
-            })
-        }
-    }
+//    func downloadImages(photoDictionaries: [[String: AnyObject]]) {
+//        //pin.photos = [Photo]()
+//        print("Downlooding images")
+//        for photoDictionary in photoDictionaries {
+//            guard let imageUrlString = photoDictionary["url_m"] as? String else {
+//                print("Could not find key: url_m")
+//                return
+//            }
+//            print("Got image url")
+//            Flickr.sharedInstance().taskForImageWithUrl(imageUrlString, completionHandler: { (imageData, error) -> Void in
+//                if let imageData = imageData {
+//                    performUIUpdatesOnMain({ () -> Void in
+//                        let photo = Photo(imageUrl: imageUrlString, imageData: imageData, context: self.sharedContext)
+//                        photo.pin = self.pin
+//                        print("Created photo")
+//                        //self.pin.photos.append(photo)
+//                    })
+//                    
+//                }
+//            })
+//        }
+//    }
     
     
     // MARK: Map View
@@ -193,7 +176,8 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
             cell.imageView.image = UIImage(named: "placeholder")
             //searchPhotos(pin.latitude, lon: pin.longitude)
         } else {
-            let photo = pin.photos[indexPath.row]
+            let arrayOfPhotos = Array(pin.photos) as! [Photo] 
+            let photo = arrayOfPhotos[indexPath.row]
             print("Got Photo")
             performUIUpdatesOnMain({ () -> Void in
                 cell.imageView.image = UIImage(data: photo.imageData!)
@@ -301,7 +285,7 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
             deleteSelectedPhotos()
         } else {
             deleteAllPhotos()
-            searchPhotos(pin.latitude, lon: pin.longitude)
+            getPhotosForLoaction(pin)
             
         }
         
