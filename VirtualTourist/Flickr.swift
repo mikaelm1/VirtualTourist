@@ -94,16 +94,20 @@ class Flickr {
                 completionHandler(result: nil, error: "No photos Found")
                 return
             } else {
-                for photoDictionary in photosArrayOfDicts {
-                    guard let imageUrlString = photoDictionary["url_m"] as? String else {
-                        print("Could not find key: url_m")
-                        return
+                
+                performUIUpdatesOnMain({ () -> Void in
+                    for photoDictionary in photosArrayOfDicts {
+                        guard let imageUrlString = photoDictionary["url_m"] as? String else {
+                            print("Could not find key: url_m")
+                            return
+                        }
+                        
+                        let photo = Photo(imageUrl: imageUrlString, context: sharedInstance().sharedContext)
+                        photo.pin = pin
+                        photosToReturn.append(photo)
                     }
-                    
-                    let photo = Photo(imageUrl: imageUrlString, context: sharedInstance().sharedContext)
-                    photo.pin = pin 
-                    photosToReturn.append(photo)
-                }
+                })
+                
             }
             
         }

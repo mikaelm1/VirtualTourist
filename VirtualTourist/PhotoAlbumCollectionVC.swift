@@ -63,7 +63,7 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
         if pin.photos.count == 0 {
             
             print("Pin's photos is empty")
-            getPhotosForLoaction(pin)
+            getPhotosForPin(pin)
         }
         
     }
@@ -83,7 +83,7 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
         collectionView.collectionViewLayout = layout
     }
     
-    func getPhotosForLoaction(pin: Pin) -> [Photo] {
+    func getPhotosForPin(pin: Pin) -> [Photo] {
         print("SearchPhotos in Album")
         var photos = [Photo]()
         Flickr.sharedInstance().taskForLocation(pin) { (result, error) -> Void in
@@ -92,34 +92,43 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
                 print(error)
             } else {
                 photos = result!
+                performUIUpdatesOnMain({ () -> Void in
+                    self.saveContext()
+
+                })
             }
         }
         return photos
     }
     
-//    func downloadImages(photoDictionaries: [[String: AnyObject]]) {
-//        //pin.photos = [Photo]()
-//        print("Downlooding images")
-//        for photoDictionary in photoDictionaries {
-//            guard let imageUrlString = photoDictionary["url_m"] as? String else {
-//                print("Could not find key: url_m")
-//                return
-//            }
-//            print("Got image url")
-//            Flickr.sharedInstance().taskForImageWithUrl(imageUrlString, completionHandler: { (imageData, error) -> Void in
-//                if let imageData = imageData {
-//                    performUIUpdatesOnMain({ () -> Void in
-//                        let photo = Photo(imageUrl: imageUrlString, imageData: imageData, context: self.sharedContext)
-//                        photo.pin = self.pin
-//                        print("Created photo")
-//                        //self.pin.photos.append(photo)
-//                    })
-//                    
-//                }
-//            })
-//        }
-//    }
+    func downloadImageForPhoto(photo: Photo) -> UIImage {
+        let imageData = NSData(contentsOfURL: NSURL(string: photo.imageUrl)!)
+        let path = pathForUrl(NSURL(string: photo.imageUrl)!.lastPathComponent!)
+        do {
+            try photo.imageUrl.writeToFile(path, atomically: true, encoding: NSStringEncoding())
+            print("Saved to Documents Directory")
+        } catch {
+            
+        }
+        return UIImage(data: imageData!)!
+    }
     
+    func deletePhoto(photo: Photo) {
+        let path = pathForUrl((NSURL(string: photo.imageUrl)?.lastPathComponent)!)
+        do {
+            try NSFileManager.defaultManager().removeItemAtPath(path)
+            print("Deleted from Documents Directory")
+        } catch {
+            print("Photo was not deleted from File Manager")
+        }
+    }
+    
+    func pathForUrl(url: String) -> String {
+        let documentsDirectoryUrl = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first!
+        let fullUrl = documentsDirectoryUrl.URLByAppendingPathComponent(url)
+        
+        return fullUrl.path!
+    }
     
     // MARK: Map View
     
@@ -172,34 +181,15 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
     
     func configureCell(cell: PhotoAlbumCell, atIndexPath indexPath: NSIndexPath) {
         print("Count of photos in Pin's array of photos: \(pin.photos.count)")
-        if pin.photos.count < 12 {
-            cell.imageView.image = UIImage(named: "placeholder")
-            //searchPhotos(pin.latitude, lon: pin.longitude)
-        } else {
-            let arrayOfPhotos = Array(pin.photos) as! [Photo] 
-            let photo = arrayOfPhotos[indexPath.row]
-            print("Got Photo")
-            performUIUpdatesOnMain({ () -> Void in
-                cell.imageView.image = UIImage(data: photo.imageData!)
-            })
-            
-        } 
-            //else { // has image but not downloaded
-//            //cell.imageView.image = UIImage(named: "placeholder")
-//            let photo = pin.photos[indexPath.row]
-//            let task = Flickr.sharedInstance().taskForImageWithUrl(photo.imageUrl, completionHandler: { (imageData, error) -> Void in
-//                
-//                if let data = imageData {
-//                    photo.imageData = data
-//                    
-//                    performUIUpdatesOnMain({ () -> Void in
-//                        cell.imageView.image = UIImage(data: data)
-//                    })
-//                }
-//            })
-//        }
         
-        if let index = selectedIndexPaths.indexOf(indexPath) {
+        cell.imageView.image = UIImage(named: "placeholder")
+        let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
+        performUIUpdatesOnMain { () -> Void in
+            let image = self.downloadImageForPhoto(photo)
+            cell.imageView.image = image
+        }
+        
+        if let _ = selectedIndexPaths.indexOf(indexPath) {
             cell.alpha = 0.5
         } else {
             cell.alpha = 1
@@ -285,7 +275,7 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
             deleteSelectedPhotos()
         } else {
             deleteAllPhotos()
-            getPhotosForLoaction(pin)
+            getPhotosForPin(pin)
             
         }
         
@@ -294,6 +284,7 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
     func deleteAllPhotos() {
         for photo in fetchedResultsController.fetchedObjects as! [Photo] {
             sharedContext.deleteObject(photo)
+            deletePhoto(photo)
         }
         saveContext()
     }
@@ -301,7 +292,7 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
     func deleteSelectedPhotos() {
         for indexPath in selectedIndexPaths {
             let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
-            
+            deletePhoto(photo)
             sharedContext.deleteObject(photo)
         }
         selectedIndexPaths = [NSIndexPath]()
