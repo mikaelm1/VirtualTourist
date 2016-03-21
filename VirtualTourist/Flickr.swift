@@ -104,6 +104,7 @@ class Flickr {
                         
                         let photo = Photo(imageUrl: imageUrlString, context: sharedInstance().sharedContext)
                         photo.pin = pin
+                        sharedInstance().saveContext() 
                         photosToReturn.append(photo)
                     }
                 })
@@ -138,6 +139,9 @@ class Flickr {
         return task 
     }
     
+    func saveContext() {
+        CoreDataStackManager.sharedInstance().saveContext()
+    }
     
     
     // MARK: Shared Instance

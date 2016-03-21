@@ -61,7 +61,6 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
         setUpMap()
         print("The pin's photos: \(pin.photos.count)")
         if pin.photos.count == 0 {
-            
             print("Pin's photos is empty")
             getPhotosForPin(pin)
         }
@@ -92,9 +91,6 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
                 print(error)
             } else {
                 photos = result!
-                performUIUpdatesOnMain({ () -> Void in
-                    self.saveContext()
-                })
             }
         }
         return photos
@@ -181,16 +177,17 @@ class PhotoAlbumCollectionVC: UIViewController, UICollectionViewDataSource, UICo
         print("Count of photos in Pin's array of photos: \(pin.photos.count)")
         
         let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
+        cell.imageView.image = UIImage(named: "placeholder")
         if photo.imageData == nil {
-            cell.imageView.image = UIImage(named: "placeholder")
             performUIUpdatesOnMain({ () -> Void in
                 self.downloadImageForPhoto(photo)
                 cell.imageView.image = UIImage(data: photo.imageData!)
             })
         } else {
-            cell.imageView.image = UIImage(data: photo.imageData!)
+            performUIUpdatesOnMain({ () -> Void in
+                cell.imageView.image = UIImage(data: photo.imageData!)
+            })
         }
-        //collectionView.reloadData()
         if let _ = selectedIndexPaths.indexOf(indexPath) {
             cell.alpha = 0.5
         } else {
